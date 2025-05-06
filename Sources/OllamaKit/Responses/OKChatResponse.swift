@@ -64,12 +64,18 @@ public struct OKChatResponse: OKCompletionResponse, Decodable, Sendable {
             
             /// The message is from the user.
             case user
+
+            /// The message is from a tool .
+            case tool
         }
         
         /// A structure that represents a tool call in the response.
         public struct ToolCall: Decodable, Sendable {
             /// An optional ``Function`` structure representing the details of the tool call.
             public let function: Function?
+            
+            /// The unique identifier for this specific tool call.
+            public let id: String?
             
             /// A structure that represents the details of a tool call.
             public struct Function: Decodable, Sendable {
