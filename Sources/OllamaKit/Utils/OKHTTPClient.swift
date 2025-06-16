@@ -20,14 +20,14 @@ internal extension OKHTTPClient {
         try validate(response: response)
     }
     
-    func send<T: Decodable>(request: URLRequest, with responseType: T.Type) async throws -> T {
+    func send<T: Decodable & Sendable>(request: URLRequest, with responseType: T.Type) async throws -> T {
         let (data, response) = try await URLSession.shared.data(for: request)
         try validate(response: response)
         
         return try decoder.decode(T.self, from: data)
     }
     
-    func stream<T: Decodable>(request: URLRequest, with responseType: T.Type) -> AsyncThrowingStream<T, Error> {
+    func stream<T: Decodable & Sendable>(request: URLRequest, with responseType: T.Type) -> AsyncThrowingStream<T, Error> {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -48,7 +48,7 @@ internal extension OKHTTPClient {
                         
                         while let chunk = self.extractNextJSON(from: &buffer) {
                             do {
-                                let decodedObject = try self.decoder.decode(T.self, from: chunk)
+                                let decodedObject = try self.decoder.decode(responseType, from: chunk)
                                 continuation.yield(decodedObject)
                             } catch {
                                 continuation.finish(throwing: error)
@@ -67,7 +67,7 @@ internal extension OKHTTPClient {
 }
 
 internal extension OKHTTPClient {
-    func send<T: Decodable>(request: URLRequest, with responseType: T.Type) -> AnyPublisher<T, Error> {
+    func send<T: Decodable & Sendable>(request: URLRequest, with responseType: T.Type) -> AnyPublisher<T, Error> {
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { data, response in
                 try self.validate(response: response)
@@ -90,7 +90,7 @@ internal extension OKHTTPClient {
             .eraseToAnyPublisher()
     }
     
-    func stream<T: Decodable>(request: URLRequest, with responseType: T.Type) -> AnyPublisher<T, Error> {
+    func stream<T: Decodable & Sendable>(request: URLRequest, with responseType: T.Type) -> AnyPublisher<T, Error> {
         let delegate = StreamingDelegate()
         let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: .main)
         
@@ -105,7 +105,7 @@ internal extension OKHTTPClient {
                 var decodedObjects: [T] = []
                 
                 while let chunk = self.extractNextJSON(from: &buffer) {
-                    let decodedObject = try self.decoder.decode(T.self, from: chunk)
+                    let decodedObject = try self.decoder.decode(responseType, from: chunk)
                     decodedObjects.append(decodedObject)
                 }
                 
