@@ -24,15 +24,19 @@ public struct OKChatRequestData: Sendable {
     /// Be sure to also include "return as JSON" in your prompt
     public let format: OKJSONValue?
 
+    /// Optional boolean for thinking models to enable thinking before responding.
+    public let think: Bool?
+
     /// Optional ``OKCompletionOptions`` providing additional configuration for the chat request.
     public var options: OKCompletionOptions?
     
-    public init(model: String, messages: [Message], tools: [OKJSONValue]? = nil, format: OKJSONValue? = nil) {
-        self.stream = tools == nil
+    public init(model: String, messages: [Message], tools: [OKJSONValue]? = nil, format: OKJSONValue? = nil, think: Bool? = nil) {
+        self.stream = true
         self.model = model
         self.messages = messages
         self.tools = tools
         self.format = format
+        self.think = think
     }
     
     /// A structure that represents a single message in the chat request.
@@ -48,8 +52,14 @@ public struct OKChatRequestData: Sendable {
 
         /// An optional identifier for the tool call, required if the role is `.tool`.
         public let toolCallId: String?
+
+        /// An optional array of ``ToolCall`` instances representing tool calls made by the assistant.
+        public let toolCalls: [ToolCall]?
+
+        /// An optional string containing the model's thinking process (for thinking models).
+        public let thinking: String?
         
-        public init(role: Role, content: String, images: [String]? = nil, toolCallId: String? = nil) {
+        public init(role: Role, content: String, images: [String]? = nil, toolCallId: String? = nil, toolCalls: [ToolCall]? = nil, thinking: String? = nil) {
             // Ensure toolCallId is provided if role is tool, and not provided otherwise
             if role == .tool {
                 precondition(toolCallId != nil, "toolCallId must be provided when role is .tool")
@@ -61,6 +71,8 @@ public struct OKChatRequestData: Sendable {
             self.content = content
             self.images = images
             self.toolCallId = toolCallId
+            self.toolCalls = toolCalls
+            self.thinking = thinking
         }
         
         /// An enumeration that represents the role of the message sender.
@@ -78,20 +90,42 @@ public struct OKChatRequestData: Sendable {
             case tool
         }
 
-        // Custom encoding to include tool_call_id only when role is tool
+        /// A structure that represents a tool call in the request.
+        public struct ToolCall: Encodable, Sendable {
+            /// An optional ``Function`` structure representing the details of the tool call.
+            public let function: Function?
+            
+            /// The unique identifier for this specific tool call.
+            public let id: String?
+            
+            /// A structure that represents the details of a tool call.
+            public struct Function: Encodable, Sendable {
+                /// The name of the tool being called.
+                public let name: String?
+                
+                /// An optional ``OKJSONValue`` representing the arguments passed to the tool.
+                public let arguments: OKJSONValue?
+            }
+        }
+
+        // Custom encoding to include conditional fields
         public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(role, forKey: .role)
             try container.encode(content, forKey: .content)
             try container.encodeIfPresent(images, forKey: .images)
+            try container.encodeIfPresent(thinking, forKey: .thinking)
+            try container.encodeIfPresent(toolCalls, forKey: .toolCalls)
+            
             if role == .tool {
                 try container.encode(toolCallId, forKey: .toolCallId)
             }
         }
         
         private enum CodingKeys: String, CodingKey {
-            case role, content, images
+            case role, content, images, thinking
             case toolCallId = "tool_call_id" // Map to JSON key
+            case toolCalls = "tool_calls"
         }
     }
 }
@@ -104,6 +138,7 @@ extension OKChatRequestData: Encodable {
         try container.encode(messages, forKey: .messages)
         try container.encodeIfPresent(tools, forKey: .tools)
         try container.encodeIfPresent(format, forKey: .format)
+        try container.encodeIfPresent(think, forKey: .think)
 
         if let options {
             try options.encode(to: encoder)
@@ -111,6 +146,6 @@ extension OKChatRequestData: Encodable {
     }
     
     private enum CodingKeys: String, CodingKey {
-        case stream, model, messages, tools, format
+        case stream, model, messages, tools, format, think
     }
 }

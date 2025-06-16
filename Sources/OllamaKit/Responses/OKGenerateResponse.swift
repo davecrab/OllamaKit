@@ -18,6 +18,9 @@ public struct OKGenerateResponse: OKCompletionResponse, Decodable, Sendable {
     /// A string containing the generated content. This field will be empty if the response was streamed; otherwise, it contains the full response.
     public let response: String
     
+    /// An optional string containing the model's thinking process (for thinking models).
+    public let thinking: String?
+    
     /// An optional array of integers providing contextual information used during generation.
     public let context: [Int]?
     

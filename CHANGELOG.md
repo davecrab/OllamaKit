@@ -1,3 +1,16 @@
+# 5.1.0
+
+- **feat: adds thinking model support** - Full support for thinking models like DeepSeek-R1
+  - Added `think` parameter to chat and generate APIs
+  - Added `thinking` field in response messages to capture model's thinking process
+- **feat: enhances tool use capabilities**
+  - Added `toolCalls` property to request messages for assistant messages with tool calls
+  - Added `thinking` property to request messages for enhanced conversation flow
+  - Improved tool calling message structure for better conversation history management
+- **feat: adds suffix parameter to generate API** - Support for code completion scenarios
+- **feat: adds playground examples** - New example views demonstrating thinking and enhanced tool use features
+- **docs: comprehensive examples** - Added Examples_NewFeatures.md with detailed usage examples
+
 # 5.0.8
 
 - Handle task cancellation by @pd95 in https://github.com/kevinhermawan/OllamaKit/pull/44

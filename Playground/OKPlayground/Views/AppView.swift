@@ -49,8 +49,16 @@ struct AppView: View {
                         ChatWithFormatView()
                     }
 
+                    NavigationLink("Chat with Thinking") {
+                        ChatWithThinkingView()
+                    }
+
                     NavigationLink("Generate") {
                         GenerateView()
+                    }
+
+                    NavigationLink("Generate with Thinking") {
+                        GenerateWithThinkingView()
                     }
                 }
                 

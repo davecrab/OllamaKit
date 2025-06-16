@@ -8,6 +8,24 @@
 
 `OllamaKit` is a Swift library that streamlines interactions with the Ollama API. It handles the complexities of network communication and data processing behind the scenes, providing a simple and efficient way to integrate the Ollama API.
 
+## New Features ✨
+
+🧠 **Thinking Model Support** - Full support for thinking models like DeepSeek-R1
+- Enable thinking mode with `think: true` parameter
+- Access the model's thinking process via `thinking` field in responses
+- Works with both Chat and Generate APIs
+
+🛠️ **Enhanced Tool Use** - Improved tool calling capabilities
+- Support for `tool_calls` in assistant messages
+- Enhanced message structure for tool interactions
+- Better conversation flow management
+
+🔧 **Generate API Enhancements** - New parameters for better control
+- `suffix` parameter for code completion scenarios
+- `thinking` support for generate API
+
+See [Examples_NewFeatures.md](Examples_NewFeatures.md) for comprehensive usage examples.
+
 ## Primary Use
 
 `OllamaKit` is primarily developed to power the [Ollamac](https://github.com/kevinhermawan/Ollamac), a macOS app for interacting with Ollama models. Although the library provides robust capabilities for integrating the Ollama API, its features and optimizations are tailored specifically to meet the needs of the Ollamac.
